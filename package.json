@@ -1,0 +1,13 @@
+{
+  "name": "fetchify",
+  "version": "1.0.0",
+  "description": "",
+  "main": "/dist/fetchify.js",
+  "scripts": {
+    "build": "tsc -w",
+    "dev": "node ./dist/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
