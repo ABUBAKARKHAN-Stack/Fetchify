@@ -16,7 +16,10 @@ interface Config {
     method?: RequestMethodsType
     body?: any;
     params?: Record<string,any>;
-    allowCrossOriginCookies?:boolean
+    allowCrossOriginCookies?:boolean;
+    retryCount?: number;
+    
+
 
 }
 
