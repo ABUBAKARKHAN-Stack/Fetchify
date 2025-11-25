@@ -5,6 +5,8 @@
   "main": "dist/fetchify.js",
   "types": "dist/fetchify.d.ts",
   "files": ["dist"],
+    "type": "module",
+
   "scripts": {
     "build": "tsc",
     "dev": "node ./dist/app.js"

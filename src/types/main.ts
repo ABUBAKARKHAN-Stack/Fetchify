@@ -12,6 +12,18 @@ enum RequestMethodsType {
 }
 
 /**
+ * RetryConfig
+ * Configuration interface for request retry behavior
+ * 
+ * @property retries - Number of retry attempts after initial failure (default: 1)
+ * @property retryDelay - Delay in milliseconds between retry attempts (default: 1000)
+ */
+interface RetryConfig {
+    retries?: number;
+    retryDelay?: number;
+}
+
+/**
  * FetchifyConfig
  * Configuration interface for Fetchify requests.
  *
@@ -22,6 +34,7 @@ enum RequestMethodsType {
  * @property body - Request body for mutation requests
  * @property params - Query parameters as key-value pairs
  * @property allowCrossOriginCookies - If true, sends cookies for cross-origin requests
+ * @property retry - Retry configuration for failed requests
  */
 interface FetchifyConfig {
     baseURL?: string
@@ -33,12 +46,6 @@ interface FetchifyConfig {
     allowCrossOriginCookies?: boolean;
     retry?: RetryConfig
 }
-
-interface RetryConfig {
-    retries?: number;
-    retryDelay?: number;
-}
-
 
 /**
  * MutationType

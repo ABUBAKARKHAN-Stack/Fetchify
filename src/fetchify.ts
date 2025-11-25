@@ -3,7 +3,8 @@ import {
     RequestInterceptorType,
     ResponseInterceptorType,
     MutationType,
-    DispatchRequestType
+    DispatchRequestType,
+    RetryConfig
 } from "./types/main.js"
 
 import {
@@ -21,7 +22,7 @@ class Fetchify {
     //* -----------------------------
     //* Default Configuration
     //* -----------------------------
-    
+
     /**
      * @private
      * Default client configuration with JSON headers and timeout
@@ -291,7 +292,7 @@ class Fetchify {
     }
 
     /**
-     * Core request function that runs interceptors and dispatches fetch
+     * Core request function that handle retires, runs interceptors and dispatches fetch
      * @private
      */
     private async request({ url, config }: DispatchRequestType) {
@@ -306,7 +307,6 @@ class Fetchify {
         let finalUrl: string = query ? `${url}?${query}` : url;
         let finalRequest: DispatchRequestType = { url: finalUrl, config: this.mergeConfig(config!) }
 
-        //* Apply request interceptors
         for (const interceptor of this.requestInterceptors) {
             try {
                 finalRequest = await interceptor.successFn(finalRequest)
@@ -318,7 +318,6 @@ class Fetchify {
             }
         }
 
-        //* Last Error
         let lastError;
 
         for (let attempt = 1; attempt <= retries; attempt++) {
@@ -327,7 +326,7 @@ class Fetchify {
                 return await this.runResponseInterceptors(response)
             } catch (error) {
                 lastError = error
-                if (attempt < retries) {
+                if (attempt <= retries) {
                     console.log(`Retry ${attempt}/${retries} failed. Waiting ${retryDelay}ms...`)
                     await new Promise(res => setTimeout(res, retryDelay))
                 }
@@ -367,6 +366,7 @@ export type {
     MutationType,
     RequestInterceptorType,
     ResponseInterceptorType,
+    RetryConfig
 }
 
 export {
