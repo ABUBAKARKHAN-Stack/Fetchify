@@ -1,19 +1,47 @@
 import { Config, RequestInterceptorType, ResponseInterceptorType, MutationType, RequestMethodsType, DispatchRequestType } from "./types/main.js"
 
+/**
+ //* Fetchify
+ * A lightweight TypeScript HTTP client for making HTTP requests.
+ * Supports GET, POST, PUT, PATCH, DELETE, OPTIONS methods,
+ * request/response interceptors, query params, JSON body, timeout, and baseURL.
+ */
 class Fetchify {
 
+    //* -----------------------------
     //* Default Configuration
+    //* -----------------------------
+    /**
+     * @private
+     * Default client configuration with JSON headers and timeout
+     */
     private defaultConfig: Config = {
         headers: { 'Content-Type': 'application/json' },
         timeout: 1000
     }
 
-    //* Request Interceptors Array
-    requestInterceptors: RequestInterceptorType[] = []
+    //* -----------------------------
+    //* Interceptors
+    //* -----------------------------
 
-    //* Response Interceptors Array
-    responseInterceptors: ResponseInterceptorType[] = []
+    /**
+     * @private
+     * Request interceptors array.
+     * Each interceptor can modify request or handle errors before sending.
+     */
+    private requestInterceptors: RequestInterceptorType[] = []
 
+    /**
+     * @private
+     * Response interceptors array.
+     * Each interceptor can modify response or handle errors after receiving.
+     */
+    private responseInterceptors: ResponseInterceptorType[] = []
+
+    /**
+     * Constructor
+     * @param config - User-defined configuration object
+     */
     constructor(public config: Config) {
         this.config = this.mergeConfig({
             ...this.defaultConfig,
@@ -21,8 +49,14 @@ class Fetchify {
         })
     }
 
+    //* -----------------------------
+    //* Interceptor Methods
+    //* -----------------------------
 
-    //* Add Request Interceptors (can be multiple that's why requestInterceptors is an array)
+    /**
+     * Add a request interceptor
+     * @param {RequestInterceptorType} interceptor - Interceptor with successFn and errorFn if error occurs
+     */
     async addRequestInterceptors(
         {
             successFn,
@@ -35,7 +69,10 @@ class Fetchify {
         })
     }
 
-    //* Add Response Interceptors (can be multiple that's why responseInterceptors is an array)
+    /**
+     * Add a response interceptor
+     * @param {ResponseInterceptorType} interceptor - Interceptor with successFn and errorFn if error occurs
+     */
     async addResponseInterceptors(
         {
             errorFn,
@@ -49,7 +86,15 @@ class Fetchify {
         })
     }
 
-    //* Http Request Methods
+    //* -----------------------------
+    //* HTTP Methods
+    //* -----------------------------
+
+    /**
+     * Send a GET request
+     * @param url - Endpoint URL
+     * @param config - Optional configuration overrides
+     */
     async get(url: string, config?: Config) {
         return this.request({
             url,
@@ -58,12 +103,17 @@ class Fetchify {
                 method: RequestMethodsType.GET,
                 headers: {
                     ...(config?.headers || {}),
-
                 }
             }
         })
     }
 
+    /**
+     * Send a POST request
+     * @param url - Endpoint URL
+     * @param body - Request body
+     * @param config - Optional configuration overrides
+     */
     async post<TBody>(url: string, body: TBody, config?: Config) {
         return this.mutation({
             body,
@@ -73,6 +123,12 @@ class Fetchify {
         })
     }
 
+    /**
+     * Send a PUT request
+     * @param url - Endpoint URL
+     * @param body - Request body
+     * @param config - Optional configuration overrides
+     */
     async put<TBody>(url: string, body: TBody, config?: Config) {
         return this.mutation({
             body,
@@ -82,6 +138,13 @@ class Fetchify {
         })
     }
 
+
+    /**
+     * Send a PATCH request
+     * @param url - Endpoint URL
+     * @param body - Request body
+     * @param config - Optional configuration overrides
+     */
     async patch<TBody>(url: string, body: TBody, config?: Config) {
         return this.mutation({
             body,
@@ -91,15 +154,43 @@ class Fetchify {
         })
     }
 
-    async delete(url: string, config?: Config,) {
+    /**
+     * Send a DELETE request
+     * @param url - Endpoint URL
+     * @param config - Optional configuration overrides
+     */
+    async delete(url: string, config?: Config) {
         return this.mutation({
             url,
-            config: config || {}
+            config: config || {},
+            method: RequestMethodsType.DELETE
         })
     }
 
-    //* Private Methods
+    /**
+     * Send a OPTIONS request
+     * @param url - Endpoint URL
+     * @param config - Optional configuration overrides
+     */
+    async options(url: string, config?: Config) {
+        return this.request({
+            url,
+            config: {
+                ...config,
+                method: RequestMethodsType.OPTIONS
+            }
+        });
+    }
 
+
+    //* -----------------------------
+    //* Private Methods
+    //* -----------------------------
+
+    /**
+     * Merge user config, default config, and request config
+     * @private
+     */
     private mergeConfig(config: Config) {
         return {
             ...this.defaultConfig,
@@ -113,6 +204,11 @@ class Fetchify {
         }
     }
 
+    /**
+     * Dispatch actual HTTP request using fetch
+     * Handles timeout and baseURL logic
+     * @private
+     */
     private async dispatchRequest({ url, config }: DispatchRequestType) {
         const abortController = new AbortController()
         const finalConfig = config ? this.mergeConfig(config) : this.config
@@ -129,6 +225,7 @@ class Fetchify {
 
         let finalUrl: string = "";
 
+        // Compose final URL based on baseURL and url
         if (this.config.baseURL?.endsWith("/") && url.startsWith("/")) {
             finalUrl = `${this.config.baseURL}${url.slice(1)}`
         } else if (this.config.baseURL?.endsWith("/") && !url.startsWith("/")) {
@@ -144,7 +241,7 @@ class Fetchify {
             const response = await fetch(finalUrl, {
                 ...fetchOpts,
                 signal: abortController.signal,
-                credentials: fetchOpts.allowCrossOriginCookies ? "include" : undefined
+                credentials: fetchOpts.allowCrossOriginCookies ? "include" : "same-origin"
             })
             return response
         } finally {
@@ -152,6 +249,10 @@ class Fetchify {
         }
     }
 
+    /**
+     * Handle mutation requests (POST, PUT, PATCH, DELETE)
+     * @private
+     */
     private async mutation<TBody>({ body, url, config, method }: MutationType<TBody>) {
         return this.request({
             url,
@@ -167,28 +268,16 @@ class Fetchify {
         })
     }
 
-
+    /**
+     * Core request function that runs interceptors and dispatches fetch
+     * @private
+     */
     private async request({ url, config }: DispatchRequestType) {
-        //! MANUAL  LOGIC 
-        // let paramsParts: string[] = [];
-
-        // if (config?.params) {
-        //     const params = Object.entries(config.params).map(([key, value]) => ({ key, value }))
-        //     console.log(``);
-        //     paramsParts.unshift(`?${params[0].key}=${params[0].value}`)
-
-        //     params.slice(1).forEach((param) => {
-        //         paramsParts.push(`&${param.key}=${param.value}`)
-        //     })
-        // }
-        // let finalUrl: string = `${url}${paramsParts.join("")}`;
-
         const query = new URLSearchParams(config.params).toString()
         let finalUrl: string = query ? `${url}?${query}` : url;
         let finalRequest: DispatchRequestType = { url: finalUrl, config: this.mergeConfig(config!) }
 
-        //* Request Interceptor
-
+        //* Apply request interceptors
         for (const interceptor of this.requestInterceptors) {
             try {
                 finalRequest = await interceptor.successFn(finalRequest)
@@ -201,7 +290,6 @@ class Fetchify {
         }
 
         //* Dispatch Request
-
         let response: Response;
 
         try {
@@ -210,7 +298,7 @@ class Fetchify {
             return Promise.reject(err)
         }
 
-        //* Run Response Interceptor
+        //* Apply response interceptors
         for (const interceptor of this.responseInterceptors) {
             try {
                 response = await interceptor.successFn(response)
@@ -226,7 +314,10 @@ class Fetchify {
 
 }
 
-
+/**
+ * Factory function to create Fetchify instance
+ * @param config - Configuration for Fetchify instance
+ */
 function create(config: Config) {
     return new Fetchify(config)
 }

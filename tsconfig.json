@@ -1,18 +1,25 @@
 {
   "compilerOptions": {
-    "target": "ESNext",            // Modern JavaScript features
-    "module": "CommonJS",          // Output CommonJS code
-    "moduleResolution": "node",    // Node module resolution
-    "esModuleInterop": true,       // Allow default imports from CommonJS
-    "strict": true,                // TypeScript strict checks
-    "skipLibCheck": true,          // Skip type checking of declaration files
+    "target": "ESNext", 
+    "module": "CommonJS", 
+    "moduleResolution": "node", 
+    "esModuleInterop": true, 
+    "strict": true, 
+    "skipLibCheck": true, 
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",            // Output compiled files
-    "baseUrl": "./src",            // Base for module resolution
+    "outDir": "./dist",
+    "baseUrl": "./src",
     "paths": {
-      "*": ["node_modules/*"]
+      "*": [
+        "node_modules/*"
+      ]
     }
   },
-  "include": ["src/**/*"],         // Include the source files
-  "exclude": ["node_modules" , "./src/types"]      // Exclude the node_modules folder
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "./src/types"
+  ] 
 }
