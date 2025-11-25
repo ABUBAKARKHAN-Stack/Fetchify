@@ -8,31 +8,32 @@ enum RequestMethodsType {
 }
 
 
+interface RetryConfig {
+    retries?: number;
+    retryDelay?: number;
+}
 
-interface Config {
+interface FetchifyConfig {
     baseURL?: string
-    timeout?: number
+    timeout?: number;
     headers?: Record<string, string>
     method?: RequestMethodsType
     body?: any;
-    params?: Record<string,any>;
-    allowCrossOriginCookies?:boolean;
-    retryCount?: number;
-    
-
-
+    params?: Record<string, any>;
+    allowCrossOriginCookies?: boolean;
+    retry?: RetryConfig
 }
 
 interface MutationType<TBody> {
     url: string,
     body?: TBody,
-    config: Config;
-    method?: RequestMethodsType
+    config: FetchifyConfig;
+    method: RequestMethodsType
 }
 
 interface DispatchRequestType {
     url: string;
-    config: Config;
+    config: FetchifyConfig;
 }
 
 interface RequestInterceptorType {
@@ -41,18 +42,19 @@ interface RequestInterceptorType {
     errorFn?: (err: unknown) => Promise<never>;
 }
 
+
 interface ResponseInterceptorType<T = Response> {
     successFn: (response: T) => T | Promise<T>;
     errorFn?: (err: unknown) => Promise<never>;
 }
 
-
-
+// Export all types
 export {
-    Config,
+    FetchifyConfig,
     MutationType,
     RequestMethodsType,
     RequestInterceptorType,
     ResponseInterceptorType,
-    DispatchRequestType
+    DispatchRequestType,
+    RetryConfig
 }
