@@ -1,4 +1,4 @@
-import type {
+import {
     FetchifyConfig,
     RequestInterceptorType,
     ResponseInterceptorType,
@@ -21,13 +21,18 @@ class Fetchify {
     //* -----------------------------
     //* Default Configuration
     //* -----------------------------
+    
     /**
      * @private
      * Default client configuration with JSON headers and timeout
      */
     private defaultConfig: FetchifyConfig = {
         headers: { 'Content-Type': 'application/json' },
-        timeout: 1000
+        timeout: 1000,
+        retry: {
+            retries: 1,
+            retryDelay: 1000
+        }
     }
 
     //* -----------------------------
@@ -67,7 +72,7 @@ class Fetchify {
      * Add a request interceptor
      * @param {RequestInterceptorType} interceptor - Interceptor with successFn and errorFn if error occurs
      */
-    async addRequestInterceptors(
+    addRequestInterceptors(
         {
             successFn,
             errorFn
@@ -83,7 +88,7 @@ class Fetchify {
      * Add a response interceptor
      * @param {ResponseInterceptorType} interceptor - Interceptor with successFn and errorFn if error occurs
      */
-    async addResponseInterceptors(
+    addResponseInterceptors(
         {
             errorFn,
             successFn
@@ -210,7 +215,13 @@ class Fetchify {
                 ...(this.defaultConfig.headers || {}),
                 ...(this.config.headers) || {},
                 ...(config?.headers) || {},
+            },
+            retry: {
+                ...(this.defaultConfig.retry || {}),
+                ...(this.config.retry) || {},
+                ...(config?.retry) || {},
             }
+
         }
     }
 
@@ -228,6 +239,7 @@ class Fetchify {
             ...fetchOpts
         } = finalConfig
         let timeoutRef: number | undefined;
+
 
         if (timeout) {
             timeoutRef = setTimeout(() => abortController.abort(), timeout)
@@ -283,7 +295,14 @@ class Fetchify {
      * @private
      */
     private async request({ url, config }: DispatchRequestType) {
-        const query = new URLSearchParams(config.params).toString()
+        const finalConfig = this.mergeConfig(config)
+
+        if (!finalConfig.retry?.retries) throw new Error("Retries should be atleast 1")
+
+        const retries = finalConfig.retry.retries
+        const retryDelay = finalConfig.retry.retryDelay!
+
+        const query = new URLSearchParams(config.params || {}).toString()
         let finalUrl: string = query ? `${url}?${query}` : url;
         let finalRequest: DispatchRequestType = { url: finalUrl, config: this.mergeConfig(config!) }
 
@@ -299,16 +318,26 @@ class Fetchify {
             }
         }
 
-        //* Dispatch Request
-        let response: Response;
+        //* Last Error
+        let lastError;
 
-        try {
-            response = await this.dispatchRequest(finalRequest)
-        } catch (err) {
-            return Promise.reject(err)
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                const response = await this.dispatchRequest(finalRequest)
+                return await this.runResponseInterceptors(response)
+            } catch (error) {
+                lastError = error
+                if (attempt < retries) {
+                    console.log(`Retry ${attempt}/${retries} failed. Waiting ${retryDelay}ms...`)
+                    await new Promise(res => setTimeout(res, retryDelay))
+                }
+            }
         }
+        throw lastError
 
-        //* Apply response interceptors
+    }
+
+    private async runResponseInterceptors(response: Response) {
         for (const interceptor of this.responseInterceptors) {
             try {
                 response = await interceptor.successFn(response)

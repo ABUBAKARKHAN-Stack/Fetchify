@@ -29,9 +29,16 @@ interface FetchifyConfig {
     headers?: Record<string, string>
     method?: RequestMethodsType
     body?: any;
-    params?: Record<string,any>;
-    allowCrossOriginCookies?: boolean
+    params?: Record<string, any>;
+    allowCrossOriginCookies?: boolean;
+    retry?: RetryConfig
 }
+
+interface RetryConfig {
+    retries?: number;
+    retryDelay?: number;
+}
+
 
 /**
  * MutationType
@@ -95,5 +102,6 @@ export {
     RequestMethodsType,
     RequestInterceptorType,
     ResponseInterceptorType,
-    DispatchRequestType
+    DispatchRequestType,
+    RetryConfig
 }
