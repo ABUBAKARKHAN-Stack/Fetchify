@@ -12,7 +12,7 @@ enum RequestMethodsType {
 }
 
 /**
- * Config
+ * FetchifyConfig
  * Configuration interface for Fetchify requests.
  *
  * @property baseURL - Base URL prepended to request URLs
@@ -23,7 +23,7 @@ enum RequestMethodsType {
  * @property params - Query parameters as key-value pairs
  * @property allowCrossOriginCookies - If true, sends cookies for cross-origin requests
  */
-interface Config {
+interface FetchifyConfig {
     baseURL?: string
     timeout?: number;
     headers?: Record<string, string>
@@ -46,7 +46,7 @@ interface Config {
 interface MutationType<TBody> {
     url: string,
     body?: TBody,
-    config: Config;
+    config: FetchifyConfig;
     method: RequestMethodsType
 }
 
@@ -59,7 +59,7 @@ interface MutationType<TBody> {
  */
 interface DispatchRequestType {
     url: string;
-    config: Config;
+    config: FetchifyConfig;
 }
 
 /**
@@ -90,7 +90,7 @@ interface ResponseInterceptorType<T = Response> {
 
 // Export all types
 export {
-    Config,
+    FetchifyConfig,
     MutationType,
     RequestMethodsType,
     RequestInterceptorType,

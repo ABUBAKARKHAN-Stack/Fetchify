@@ -1,4 +1,14 @@
-import { Config, RequestInterceptorType, ResponseInterceptorType, MutationType, RequestMethodsType, DispatchRequestType } from "./types/main.js"
+import type {
+    FetchifyConfig,
+    RequestInterceptorType,
+    ResponseInterceptorType,
+    MutationType,
+    DispatchRequestType
+} from "./types/main.js"
+
+import {
+    RequestMethodsType,
+} from './types/main.js'
 
 /**
  //* Fetchify
@@ -15,7 +25,7 @@ class Fetchify {
      * @private
      * Default client configuration with JSON headers and timeout
      */
-    private defaultConfig: Config = {
+    private defaultConfig: FetchifyConfig = {
         headers: { 'Content-Type': 'application/json' },
         timeout: 1000
     }
@@ -42,7 +52,7 @@ class Fetchify {
      * Constructor
      * @param config - User-defined configuration object
      */
-    constructor(public config: Config) {
+    constructor(public config: FetchifyConfig) {
         this.config = this.mergeConfig({
             ...this.defaultConfig,
             ...config,
@@ -95,7 +105,7 @@ class Fetchify {
      * @param url - Endpoint URL
      * @param config - Optional configuration overrides
      */
-    async get(url: string, config?: Config) {
+    async get(url: string, config?: FetchifyConfig) {
         return this.request({
             url,
             config: {
@@ -114,7 +124,7 @@ class Fetchify {
      * @param body - Request body
      * @param config - Optional configuration overrides
      */
-    async post<TBody>(url: string, body: TBody, config?: Config) {
+    async post<TBody>(url: string, body: TBody, config?: FetchifyConfig) {
         return this.mutation({
             body,
             url,
@@ -129,7 +139,7 @@ class Fetchify {
      * @param body - Request body
      * @param config - Optional configuration overrides
      */
-    async put<TBody>(url: string, body: TBody, config?: Config) {
+    async put<TBody>(url: string, body: TBody, config?: FetchifyConfig) {
         return this.mutation({
             body,
             url,
@@ -145,7 +155,7 @@ class Fetchify {
      * @param body - Request body
      * @param config - Optional configuration overrides
      */
-    async patch<TBody>(url: string, body: TBody, config?: Config) {
+    async patch<TBody>(url: string, body: TBody, config?: FetchifyConfig) {
         return this.mutation({
             body,
             url,
@@ -159,7 +169,7 @@ class Fetchify {
      * @param url - Endpoint URL
      * @param config - Optional configuration overrides
      */
-    async delete(url: string, config?: Config) {
+    async delete(url: string, config?: FetchifyConfig) {
         return this.mutation({
             url,
             config: config || {},
@@ -172,7 +182,7 @@ class Fetchify {
      * @param url - Endpoint URL
      * @param config - Optional configuration overrides
      */
-    async options(url: string, config?: Config) {
+    async options(url: string, config?: FetchifyConfig) {
         return this.request({
             url,
             config: {
@@ -191,7 +201,7 @@ class Fetchify {
      * Merge user config, default config, and request config
      * @private
      */
-    private mergeConfig(config: Config) {
+    private mergeConfig(config: FetchifyConfig) {
         return {
             ...this.defaultConfig,
             ...this.config,
@@ -318,10 +328,23 @@ class Fetchify {
  * Factory function to create Fetchify instance
  * @param config - Configuration for Fetchify instance
  */
-function create(config: Config) {
+function create(config: FetchifyConfig) {
     return new Fetchify(config)
+}
+
+export type {
+    FetchifyConfig,
+    DispatchRequestType,
+    MutationType,
+    RequestInterceptorType,
+    ResponseInterceptorType,
+}
+
+export {
+    RequestMethodsType
 }
 
 export default {
     create
 }
+
