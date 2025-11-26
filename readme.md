@@ -157,6 +157,16 @@ api.addResponseInterceptors({
 
 ---
 
+
+## Author & Repository
+
+**Author:** Abubakar Aijaz  
+**Email:** abubakar123456654123@gmail.com  
+**GitHub Repository:** [https://github.com/ABUBAKARKHAN-Stack/Fetchify](https://github.com/ABUBAKARKHAN-Stack/Fetchify)  
+**NPM Package:** [https://www.npmjs.com/package/fetchify-client](https://www.npmjs.com/package/fetchify-client)
+
+--- 
+
 ## License
 
 MIT License
