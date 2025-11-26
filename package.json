@@ -1,16 +1,25 @@
 {
-  "name": "fetchify",
-  "version": "1.0.0",
-  "description": "",
-  "main": "/dist/fetchify.js",
+  "name": "fetchify-client",
+  "version": "1.0.10",
+  "description": "A lightweight, interceptor-based HTTP client for JavaScript and TypeScript, inspired by Axios and Fetch API.",
+  "main": "dist/fetchify.js",
+  "types": "dist/fetchify.d.ts",
+  "files": ["dist"],
+    "type": "module",
+
   "scripts": {
-    "build": "tsc -w",
+    "build": "tsc",
     "dev": "node ./dist/app.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "axios": "^1.13.2"
-  }
+  "keywords": [
+    "fetchify",
+    "http-client",
+    "fetch",
+    "javascript",
+    "typescript",
+    "interceptors",
+    "api-client"
+  ],
+  "author": "Abubakar Aijaz <abubakar123456654123@gmail.com>",
+  "license": "MIT"
 }
